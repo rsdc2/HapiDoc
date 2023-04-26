@@ -4,7 +4,7 @@
 module EpiDoc.Lb
     (Lb
     , createLb
-    , ws
+    , tokens
     , show
     , lbCursor
     ) where
@@ -15,19 +15,19 @@ import Text.XML.Cursor
 import XmlUtils
 import EpiDoc.EpiDoc
 import EpiDoc.TypeClasses
-import EpiDoc.Word 
+import EpiDoc.Token
 import qualified Data.Text as T
 
 data Lb = Lb {lbCursor :: Cursor}
 
 
-instance EpiDoc.Word.Wordable Lb where
-    ws :: Lb -> [W]
-    ws lb = do 
+instance EpiDoc.Token.HasTokens Lb where
+    tokens :: Lb -> [Token]
+    tokens lb = do 
         let wordFilter e = localName e == Just "w"
         let sibs = followingSibling . lbCursor $ lb
         let filtered = filter wordFilter sibs
-        [EpiDoc.Word.create e | e <- filtered]
+        [EpiDoc.Token.create e | e <- filtered]
         
 instance Show Lb where
     show :: Lb -> String

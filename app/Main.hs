@@ -11,18 +11,19 @@ import Data.Data
 import qualified Data.Text as T
 
 import qualified EpiDoc.Edition as E
-import qualified EpiDoc.Word as W
+import qualified EpiDoc.Token as Token
 import qualified EpiDoc.Lb as Lb
 import XmlUtils
-import EpiDoc.TypeClasses (WContentable(wContent))
+import EpiDoc.TypeClasses (HasTextContent(textContent))
 import Control.Applicative (Alternative(some)) 
+import EpiDoc.Edition (edition)
 
 
 isicFunc :: IO ()
 isicFunc = do
     doc <- readFile def "ISic000001.xml"
     let descs = descendant . E.editionCursor . E.edition $ doc
-    print $ T.concat $ descs >>= content
+    print $ T.concat $ content =<< descs
         -- divNode doc & head & descendant >>= content
         -- content . head . descendant . head $ divNode doc
     -- let cursor = fromDocument doc
@@ -42,9 +43,9 @@ isicFunc' = do
 isicFunc'' :: IO ()
 isicFunc'' = do
     doc <- readFile def "ISic000001.xml"
-    let contentMap xs = [wContent x | x <- xs]
+    let contentMap xs = [textContent x | x <- xs]
     -- let firstW = head . E.ws . E.edition $ doc
-    let ws = W.ws . E.edition $ doc
+    let ws = Token.tokens . E.edition $ doc
     let ds = contentMap ws
 
     -- let cont = ds >>= content
@@ -59,21 +60,27 @@ applyMaybe (Just x) f = f x
 parents :: IO()
 parents = do
     doc <- readFile def "ISic000001.xml"
-    let ws = W.ws . E.edition $ doc
-    let parents' = head . map localName . parent . head $ [W.cursor w | w <- ws]
+    let ws = Token.tokens . E.edition $ doc
+    let parents' = head . map localName . parent . head $ [Token.cursor w | w <- ws]
     print parents'
+
 
 lbs :: IO()
 lbs = do
     doc <- readFile def "ISic000001.xml"
-    let contentMap xs = [wContent x | x <- xs]
     let lbs = E.lbs . E.edition $ doc
     let firstLb = head . tail $ lbs
-    let words = Lb.ws firstLb
-    let content = contentMap words
+    let tokens = Lb.tokens firstLb
+    let content = map show $ tokens
     print content
+
+
+editionText :: IO()
+editionText = do
+    doc <- readFile def "ISic000001.xml"
+    putStrLn $ textContent . E.edition $ doc
 
 
 main :: IO ()
 -- main = isicFunc''
-main = lbs
+main = editionText

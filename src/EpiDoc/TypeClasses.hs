@@ -1,8 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module EpiDoc.TypeClasses
-    ( WContentable
-    , wContent
+    ( HasTextContent
+    , textContent
     ) where
 
 -- import Text.XML
@@ -16,7 +16,7 @@ import EpiDoc.EpiDoc
 import qualified Data.Text as T
 
 
-class WContentable a where
-    wContent :: a -> T.Text
+class HasTextContent a where
+    textContent :: a -> String
 
 

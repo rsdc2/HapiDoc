@@ -20,6 +20,7 @@ module XmlUtils
     , parent
     , xDescCursors
     , descContent
+    , descContent'
     ) where
 
 import Text.XML
@@ -102,8 +103,16 @@ xDescCursors c nodeLocalName =
 
 
 descContent :: Cursor -> T.Text
-descContent c = T.concat $ content =<< descendant c
+descContent c = do
+    let descs = descendant c
+    let c = concat . Prelude.map content $ descs
+    -- let c = [content d | d <- descs]
+    let t = T.concat c   
+    t
 
+descContent' :: Cursor -> T.Text
+-- descContent' c = T.concat $ concat . Prelude.map content . descendant $ c 
+descContent' c = T.concat $ content =<< descendant c
 
 -- getParent :: Cursor -> Maybe Cursor
 -- getParent = 

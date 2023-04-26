@@ -29,8 +29,8 @@ library
       EpiDoc.Edition
       EpiDoc.EpiDoc
       EpiDoc.Lb
+      EpiDoc.Token
       EpiDoc.TypeClasses
-      EpiDoc.Word
       XmlUtils
   other-modules:
       Paths_HapiDoc

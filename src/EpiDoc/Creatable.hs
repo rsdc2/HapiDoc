@@ -6,10 +6,10 @@ module EpiDoc.Creatable
     ) where
 
 import EpiDoc.Edition
-import EpiDoc.Word
+import EpiDoc.Token
 import Text.XML.Cursor
 
-data EpiDocNode = Edition | Word
+data EpiDocNode = Edition | Token
 
 class Creatable c where
     create''' :: c -> Maybe EpiDocNode

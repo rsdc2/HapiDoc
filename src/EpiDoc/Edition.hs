@@ -8,6 +8,7 @@ module EpiDoc.Edition
     , edition''
     , Edition
     , lbs
+    , textContent
     ) where
 
 import Text.XML
@@ -15,27 +16,30 @@ import Text.XML.Cursor
 import XmlUtils
 import EpiDoc.EpiDoc ()
 import EpiDoc.TypeClasses hiding (words)
-import qualified EpiDoc.Word as W
+import qualified EpiDoc.Token
 import EpiDoc.Lb
-
--- class Wordable a where
---     ws :: a -> [Cursor]
+import Data.Text as T
 
 
 newtype Edition = Ed {editionCursor :: Cursor}
 
 
-instance W.Wordable Edition where
-    ws :: Edition -> [W.W]
-    ws ed = do 
+instance EpiDoc.Token.HasTokens Edition where
+    tokens :: Edition -> [EpiDoc.Token.Token]
+    tokens ed = do 
         let wCursors = xDescCursors (editionCursor ed) "w"
-        fmap W.create wCursors
+        fmap EpiDoc.Token.create wCursors
+
+
+instance HasTextContent Edition where
+    textContent :: Edition -> String
+    textContent = T.unpack . descContent' . editionCursor
 
 
 edition :: Document -> Edition
 edition doc = 
     let editionFilter xs = [d | d <- xs, hasAttrVal d "type" "edition"] in
-        create . head . editionFilter . divNodes $ doc
+        create . Prelude.head . editionFilter . divNodes $ doc
 
 
 create :: Cursor -> Edition
@@ -45,7 +49,7 @@ create = Ed
 edition' :: Document -> Maybe Edition
 edition' doc = 
     let editionFilter xs = [d | d <- xs, hasAttrVal d "type" "edition"] in
-        create' . head . editionFilter . divNodes $ doc
+        create' . Prelude.head . editionFilter . divNodes $ doc
 
 
 create' :: Cursor -> Maybe Edition
