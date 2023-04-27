@@ -17,11 +17,13 @@ import EpiDoc.EpiDoc
 import EpiDoc.TypeClasses
 import EpiDoc.Token
 import qualified Data.Text as T
+import Data.Char (digitToInt)
+import GHC.Num.BigNat (bigNatAdd)
 
 data Lb = Lb {lbCursor :: Cursor}
 
 
-instance EpiDoc.Token.HasTokens Lb where
+instance HasTokens Lb where
     tokens :: Lb -> [Token]
     tokens lb = do 
         let wordFilter e = localName e == Just "w"
@@ -29,13 +31,39 @@ instance EpiDoc.Token.HasTokens Lb where
         let filtered = filter wordFilter sibs
         [EpiDoc.Token.create e | e <- filtered]
         
+        
 instance Show Lb where
     show :: Lb -> String
-    show lb = "lb"
+    show lb = do
+        let n = numberStr lb
+        let s = show n
+        "lb(n=" ++ s ++ ")"
 
--- instance WContentable Lb where
---     wContent :: Lb -> T.Text
---     wContent lb = descContent . map ws . followingSibling . lbCursor $ lb
+
+instance HasNumber Lb where
+    numberStr :: Lb -> Maybe String
+    numberStr lb = do
+        let c = lbCursor lb
+        let as = attrs c
+        let fNumber = getAttr "n"
+        fNumber =<< as
+
+    numberInt :: Lb -> Maybe Int
+    numberInt lb = read <$> numberStr lb
+
+
+instance Ord Lb where 
+    (<) :: Lb -> Lb -> Bool
+    a < b = numberInt a < numberInt b  
+    (>) :: Lb -> Lb -> Bool
+    a > b = numberInt a > numberInt b
+    (<=) :: Lb -> Lb -> Bool
+    a <= b = numberInt a <= numberInt b
+
+
+instance Eq Lb where
+    (==) :: Lb -> Lb -> Bool
+    a == b = numberInt a == numberInt b
 
 
 cursor :: Lb -> Cursor

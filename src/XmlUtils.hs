@@ -14,6 +14,7 @@ module XmlUtils
     , localName
     , attrs
     , attr
+    , getAttr
     , hasAttrVal
     , matchLocalName
     , hasLocalName
@@ -67,6 +68,13 @@ attr a as =
       Just mp -> do
         let n = Name a Nothing Nothing
         Data.Map.lookup n mp
+
+
+getAttr :: String -> Map Name T.Text -> Maybe String
+getAttr a as = do
+    let n = Name (T.pack a) Nothing Nothing
+    let r = Data.Map.lookup n as
+    T.unpack <$> r
 
 
 divNodes :: Document -> [Cursor]

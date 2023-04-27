@@ -3,20 +3,16 @@
 module EpiDoc.TypeClasses
     ( HasTextContent
     , textContent
+    , HasNumber
+    , numberStr
+    , numberInt
     ) where
-
--- import Text.XML
-import Text.XML
-import Text.XML.Cursor
-import XmlUtils
-import EpiDoc.EpiDoc
-
-
-
-import qualified Data.Text as T
 
 
 class HasTextContent a where
     textContent :: a -> String
 
 
+class HasNumber a where
+    numberStr :: a -> Maybe String
+    numberInt :: a -> Maybe Int
