@@ -17,8 +17,6 @@ import EpiDoc.EpiDoc
 import EpiDoc.TypeClasses
 import EpiDoc.Token
 import qualified Data.Text as T
-import Data.Char (digitToInt)
-import GHC.Num.BigNat (bigNatAdd)
 
 data Lb = Lb {lbCursor :: Cursor}
 
@@ -26,9 +24,9 @@ data Lb = Lb {lbCursor :: Cursor}
 instance HasTokens Lb where
     tokens :: Lb -> [Token]
     tokens lb = do 
-        let wordFilter e = localName e == Just "w"
+        let tokenFilter e = localName e == Just "w"
         let sibs = followingSibling . lbCursor $ lb
-        let filtered = filter wordFilter sibs
+        let filtered = filter tokenFilter sibs
         [EpiDoc.Token.create e | e <- filtered]
         
         

@@ -16,7 +16,7 @@ import Text.XML.Cursor
 import XmlUtils
 import EpiDoc.EpiDoc ()
 import EpiDoc.TypeClasses hiding (words)
-import qualified EpiDoc.Token
+import EpiDoc.Token
 import EpiDoc.Lb
 import Data.Text as T
 
@@ -24,7 +24,7 @@ import Data.Text as T
 newtype Edition = Ed {editionCursor :: Cursor}
 
 
-instance EpiDoc.Token.HasTokens Edition where
+instance HasTokens Edition where
     tokens :: Edition -> [EpiDoc.Token.Token]
     tokens ed = do 
         let wCursors = xDescCursors (editionCursor ed) "w"
@@ -39,7 +39,7 @@ instance HasTextContent Edition where
 edition :: Document -> Edition
 edition doc = 
     let editionFilter xs = [d | d <- xs, hasAttrVal d "type" "edition"] in
-        create . Prelude.head . editionFilter . divNodes $ doc
+        EpiDoc.Edition.create . Prelude.head . editionFilter . divNodes $ doc
 
 
 create :: Cursor -> Edition
