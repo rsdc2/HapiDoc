@@ -36,6 +36,7 @@ instance HasCursor Lb where
     create :: Cursor -> Maybe Lb
     create c = Just (Lb c)
 
+
 instance Show Lb where
     show :: Lb -> String
     show lb = do

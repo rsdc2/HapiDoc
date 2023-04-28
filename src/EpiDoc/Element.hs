@@ -1,29 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE InstanceSigs #-}
 
-module EpiDoc.Element
-    ( EpiDoc.Element.create
-    ) where
+module EpiDoc.Element (
+    EpiDoc.Element.create,
+    followingSibElems
+) where
 
--- import Text.XML
-import Text.XML.Cursor (Cursor)
-import XmlUtils (localName)
-import EpiDoc.EpiDoc ()
-import EpiDoc.TypeClasses (HasCursor, cursor)
-import EpiDoc.Token (Token, create, HasTokens, tokens)
-import EpiDoc.Lb (create, Lb)
-
-
-data BaseElement = BaseElement Cursor
-
-
-instance HasCursor BaseElement where
-    cursor :: BaseElement -> Cursor
-    cursor (BaseElement c) = c
-
-    create :: Cursor -> Maybe BaseElement
-    create c = Just (BaseElement c)
- 
+import EpiDoc.TypeClasses(HasCursor)
+import Text.XML.Cursor(Cursor, followingSibling)
+import EpiDoc.Lb(Lb, create, cursor)
+import EpiDoc.Token(create)
+import EpiDoc.TypeClasses ( create )
+import EpiDoc.BaseElement(BaseElement, create)
+import XmlUtils(localName)
+import Data.Maybe(mapMaybe)
 
 create :: (HasCursor e) => Cursor -> Maybe e
 create c = case localName c of
@@ -31,8 +21,10 @@ create c = case localName c of
     Just "w" -> EpiDoc.Token.create c
     Just "num" -> EpiDoc.Token.create c
     Just "name" -> EpiDoc.Token.create c
-    _ -> EpiDoc.Element.create c
+    _ -> EpiDoc.BaseElement.create c
 
-getTokens :: (HasTokens a) => a -> [Token]
-getTokens = tokens
 
+followingSibElems :: (HasCursor e) => e -> [e]
+followingSibElems lb = do
+    let sibs = followingSibling . cursor $ lb
+    mapMaybe EpiDoc.Element.create sibs
