@@ -27,6 +27,7 @@ library
   exposed-modules:
       EpiDoc.Creatable
       EpiDoc.Edition
+      EpiDoc.Element
       EpiDoc.EpiDoc
       EpiDoc.Lb
       EpiDoc.Token

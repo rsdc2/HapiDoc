@@ -3,10 +3,10 @@
 
 module EpiDoc.Lb
     (Lb
-    , createLb
+    , create
     , tokens
     , show
-    , lbCursor
+    , cursor
     ) where
 
 -- import Text.XML
@@ -15,21 +15,27 @@ import Text.XML.Cursor
 import XmlUtils
 import EpiDoc.EpiDoc
 import EpiDoc.TypeClasses
-import EpiDoc.Token
+import Data.Maybe (isJust, mapMaybe)
+import EpiDoc.Token (HasTokens, Token, tokens, create)
 import qualified Data.Text as T
 
-data Lb = Lb {lbCursor :: Cursor}
+data Lb = Lb Cursor
 
 
 instance HasTokens Lb where
     tokens :: Lb -> [Token]
-    tokens lb = do 
-        let tokenFilter e = localName e == Just "w"
-        let sibs = followingSibling . lbCursor $ lb
-        let filtered = filter tokenFilter sibs
-        [EpiDoc.Token.create e | e <- filtered]
+    tokens lb = do        
+        let sibs = followingSibling . cursor $ lb
+        mapMaybe EpiDoc.Token.create sibs
         
         
+instance HasCursor Lb where
+    cursor :: Lb -> Cursor
+    cursor (Lb a) = a
+
+    create :: Cursor -> Maybe Lb
+    create c = Just (Lb c)
+
 instance Show Lb where
     show :: Lb -> String
     show lb = do
@@ -41,7 +47,7 @@ instance Show Lb where
 instance HasNumber Lb where
     numberStr :: Lb -> Maybe String
     numberStr lb = do
-        let c = lbCursor lb
+        let c = cursor lb
         let as = attrs c
         let fNumber = getAttr "n"
         fNumber =<< as
@@ -63,9 +69,3 @@ instance Eq Lb where
     (==) :: Lb -> Lb -> Bool
     a == b = numberInt a == numberInt b
 
-
-cursor :: Lb -> Cursor
-cursor = lbCursor 
-
-createLb :: Cursor -> Lb
-createLb = Lb

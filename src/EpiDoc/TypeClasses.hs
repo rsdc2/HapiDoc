@@ -8,6 +8,7 @@ module EpiDoc.TypeClasses
     , numberInt
     , HasCursor
     , cursor
+    , create
     ) where
 
 import Text.XML.Cursor
@@ -24,3 +25,4 @@ class HasNumber a where
 
 class HasCursor a where
     cursor :: a -> Cursor
+    create :: Cursor -> Maybe a

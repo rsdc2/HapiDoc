@@ -19,7 +19,7 @@ import EpiDoc.TypeClasses hiding (words)
 import EpiDoc.Token
 import EpiDoc.Lb
 import Data.Text as T
-
+import Data.Maybe (mapMaybe)
 
 newtype Edition = Ed {editionCursor :: Cursor}
 
@@ -28,7 +28,7 @@ instance HasTokens Edition where
     tokens :: Edition -> [EpiDoc.Token.Token]
     tokens ed = do 
         let wCursors = xDescCursors (editionCursor ed) "w"
-        fmap EpiDoc.Token.create wCursors
+        mapMaybe EpiDoc.Token.create wCursors
 
 
 instance HasTextContent Edition where
@@ -77,4 +77,4 @@ create'' c = case localName c of
 lbs :: Edition -> [Lb]
 lbs ed = do 
     let lbCursors = xDescCursors (editionCursor ed) "lb"
-    fmap EpiDoc.Lb.createLb lbCursors
+    mapMaybe EpiDoc.Lb.create lbCursors
