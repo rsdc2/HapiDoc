@@ -70,10 +70,10 @@ lbs = do
     doc <- readFile def "ISic000001.xml"
     let lbs = E.lbs . E.edition $ doc
     let firstLb = head . tail $ lbs
-    -- let tokens = Lb.tokens firstLb
-    -- let content = map show tokens
-    -- print content
-    print firstLb
+    let tokens = Lb.tokens firstLb
+    let c = map show tokens
+    print c
+    -- print firstLb
 
 
 editionText :: IO()

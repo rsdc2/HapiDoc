@@ -19,7 +19,22 @@ import EpiDoc.EpiDoc
 import EpiDoc.TypeClasses
 import qualified Data.Text as T
 
-data Token = Token {tokenCursor :: Cursor}
+-- data Token = Token {tokenCursor :: Cursor}
+
+data Token = 
+      Word Cursor
+    | Name Cursor
+
+
+-- instance HasCursor Token where
+--     cursor
+
+
+instance HasCursor Token where
+    cursor :: Token -> Cursor
+    cursor (Word a) = a
+    cursor (EpiDoc.Token.Name a) = a
+
 
 
 class HasTokens a where
@@ -37,8 +52,16 @@ instance Show Token where
 
 
 create :: Cursor -> Token
-create = Token
+create a = case localName a of
+    Just "w" -> Word a
+    Just "name" -> EpiDoc.Token.Name a
+    _ -> Word a
 
 
-cursor :: Token -> Cursor
-cursor = tokenCursor 
+tokenCursor :: Token -> Cursor
+tokenCursor = cursor
+
+-- cursor :: Token -> Cursor
+-- cursor = tokenCursor 
+
+
