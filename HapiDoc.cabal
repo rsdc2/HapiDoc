@@ -26,13 +26,12 @@ source-repository head
 library
   exposed-modules:
       EpiDoc.BaseElement
-      EpiDoc.Creatable
       EpiDoc.Edition
       EpiDoc.Element
-      EpiDoc.EpiDoc
       EpiDoc.Lb
       EpiDoc.Token
       EpiDoc.TypeClasses
+      EpiDoc.XMLEdition
       Utils
       XmlUtils
   other-modules:

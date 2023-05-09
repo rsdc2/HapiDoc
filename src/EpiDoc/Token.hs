@@ -15,7 +15,6 @@ module EpiDoc.Token
 import Text.XML ()
 import Text.XML.Cursor ( Cursor )
 import XmlUtils ( descContent, localName )
-import EpiDoc.EpiDoc ()
 import EpiDoc.TypeClasses ( HasCursor(..), HasTextContent(..) )
 import qualified Data.Text as T
 
@@ -45,15 +44,15 @@ class HasTokens a where
 
 
 instance HasTextContent Token where
-    textContent :: Token -> String
-    textContent = T.unpack . descContent . cursor
+    textContent :: Token -> T.Text
+    textContent = descContent . cursor
 
 
 instance Show Token where
     show :: Token -> String
-    show (Word c) = "Word('" ++ textContent (Word c) ++ "')"
-    show (Num c) = "Num('" ++ textContent (Num c) ++ "')"
-    show (EpiDoc.Token.Name c) = "Name('" ++ textContent (EpiDoc.Token.Name c) ++ "')"
+    show (Word c) = "Word('" ++ T.unpack (textContent (Word c)) ++ "')"
+    show (Num c) = "Num('" ++ T.unpack (textContent (Num c)) ++ "')"
+    show (EpiDoc.Token.Name c) = "Name('" ++ T.unpack (textContent (EpiDoc.Token.Name c)) ++ "')"
 
 
 

@@ -99,9 +99,9 @@ matchLocalName s Nothing = False
 
 
 hasLocalName :: T.Text -> Cursor -> Bool
-hasLocalName s c = do
+hasLocalName s c = 
     let ln = localName c
-    matchLocalName s ln
+    in matchLocalName s ln
 
 
 xDescCursors :: Cursor -> T.Text -> [Cursor]
@@ -121,6 +121,7 @@ descContent c = do
 descContent' :: Cursor -> T.Text
 -- descContent' c = T.concat $ concat . Prelude.map content . descendant $ c 
 descContent' c = T.concat $ content =<< descendant c
+
 
 -- getParent :: Cursor -> Maybe Cursor
 -- getParent = 

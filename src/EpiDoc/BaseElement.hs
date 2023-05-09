@@ -8,7 +8,6 @@ module EpiDoc.BaseElement
 -- import Text.XML
 import Text.XML.Cursor (Cursor)
 import XmlUtils (localName)
-import EpiDoc.EpiDoc ()
 import EpiDoc.TypeClasses (HasCursor, cursor)
 import EpiDoc.Token (Token, create, HasTokens, tokens)
 import EpiDoc.Lb (create, Lb)

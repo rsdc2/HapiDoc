@@ -10,79 +10,84 @@ import Data.Data
 
 import qualified Data.Text as T
 
-import qualified EpiDoc.Edition as E
 import qualified EpiDoc.Token as Token
 import qualified EpiDoc.Lb as Lb
 import XmlUtils
 import EpiDoc.TypeClasses (HasTextContent(textContent))
 import Control.Applicative (Alternative(some)) 
-import EpiDoc.Edition (edition)
+import EpiDoc.Edition (Edition, Token, newToken, newBoundary)
 
 
-isicFunc :: IO ()
-isicFunc = do
-    doc <- readFile def "ISic000001.xml"
-    let descs = descendant . E.editionCursor . E.edition $ doc
-    print $ T.concat $ content =<< descs
-        -- divNode doc & head & descendant >>= content
-        -- content . head . descendant . head $ divNode doc
-    -- let cursor = fromDocument doc
-    -- print . maybeLocalName . maybeElementName . getNodeElement . node $ cursor
+-- isicFunc :: IO ()
+-- isicFunc = do
+--     doc <- readFile def "ISic000001.xml"
+--     let descs = descendant . E.editionCursor . E.edition $ doc
+--     print $ T.concat $ content =<< descs
+--         -- divNode doc & head & descendant >>= content
+--         -- content . head . descendant . head $ divNode doc
+--     -- let cursor = fromDocument doc
+--     -- print . maybeLocalName . maybeElementName . getNodeElement . node $ cursor
 
 
-isicFunc' :: IO ()
-isicFunc' = do
-    doc <- readFile def "ISic000001.xml"
-    let contentMap xs = [content x | x <- xs]
-    -- let cont = fmap concat . fmap contentMap . fmap descendant . fmap E.editionCursor . E.edition' $ doc
-    -- let cont = fmap (concat . contentMap . descendant . E.editionCursor) . E.edition' $ doc
-    let cont = concat . contentMap . descendant . E.editionCursor <$> E.edition'' doc
-    print $ T.concat <$> cont
+-- isicFunc' :: IO ()
+-- isicFunc' = do
+--     doc <- readFile def "ISic000001.xml"
+--     let contentMap xs = [content x | x <- xs]
+--     -- let cont = fmap concat . fmap contentMap . fmap descendant . fmap E.editionCursor . E.edition' $ doc
+--     -- let cont = fmap (concat . contentMap . descendant . E.editionCursor) . E.edition' $ doc
+--     let cont = concat . contentMap . descendant . E.editionCursor <$> E.edition'' doc
+--     print $ T.concat <$> cont
 
 
-isicFunc'' :: IO ()
-isicFunc'' = do
-    doc <- readFile def "ISic000001.xml"
-    let contentMap xs = [textContent x | x <- xs]
-    -- let firstW = head . E.ws . E.edition $ doc
-    let ws = Token.tokens . E.edition $ doc
-    let ds = contentMap ws
+-- isicFunc'' :: IO ()
+-- isicFunc'' = do
+--     doc <- readFile def "ISic000001.xml"
+--     let contentMap xs = [textContent x | x <- xs]
+--     -- let firstW = head . E.ws . E.edition $ doc
+--     let ws = Token.tokens . E.edition $ doc
+--     let ds = contentMap ws
 
-    -- let cont = ds >>= content
-    print $ ds
-
-
-applyMaybe :: Maybe a -> (a -> Maybe b) -> Maybe b
-applyMaybe Nothing f = Nothing
-applyMaybe (Just x) f = f x
+--     -- let cont = ds >>= content
+--     print $ ds
 
 
-parents :: IO()
-parents = do
-    doc <- readFile def "ISic000001.xml"
-    let ws = Token.tokens . E.edition $ doc
-    let parents' = head . map localName . parent . head $ [Token.cursor w | w <- ws]
-    print parents'
+-- applyMaybe :: Maybe a -> (a -> Maybe b) -> Maybe b
+-- applyMaybe Nothing f = Nothing
+-- applyMaybe (Just x) f = f x
 
 
-lbs :: IO()
-lbs = do
-    doc <- readFile def "ISic000001.xml"
-    let lbs = E.lbs . E.edition $ doc
-    let firstLb = head $ lbs
-    let tokens = Lb.tokens firstLb
-    let c = map show tokens
-    print c
-    -- print firstLb
+-- parents :: IO()
+-- parents = do
+--     doc <- readFile def "ISic000001.xml"
+--     let ws = Token.tokens . E.edition $ doc
+--     let parents' = head . map localName . parent . head $ [Token.cursor w | w <- ws]
+--     print parents'
 
 
-editionText :: IO()
-editionText = do
-    doc <- readFile def "ISic000001.xml"
-    putStrLn $ textContent . E.edition $ doc
+-- lbs :: IO()
+-- lbs = do
+--     doc <- readFile def "ISic000001.xml"
+--     let lbs = E.lbs . E.edition $ doc
+--     let firstLb = head $ lbs
+--     let tokens = Lb.tokens firstLb
+--     let c = map show tokens
+--     print c
+--     -- print firstLb
+
+
+-- editionText :: IO()
+-- editionText = do
+--     doc <- readFile def "ISic000001.xml"
+--     putStrLn $ textContent . E.edition $ doc
+
+
+createEdition :: Edition
+createEdition = newToken "w" "Dis" [] <> newBoundary "lb" "1" <> newToken "w" "Manibus" []
 
 
 main :: IO ()
 -- main = isicFunc''
 -- main = editionText
-main = lbs
+main = do
+    let s = show createEdition
+    print s

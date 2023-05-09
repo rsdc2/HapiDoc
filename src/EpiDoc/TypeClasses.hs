@@ -12,10 +12,11 @@ module EpiDoc.TypeClasses
     ) where
 
 import Text.XML.Cursor
+import qualified Data.Text as T
 
 
 class HasTextContent a where
-    textContent :: a -> String
+    textContent :: a -> T.Text
 
 
 class HasNumber a where

@@ -13,7 +13,6 @@ module EpiDoc.Lb
 import Text.XML
 import Text.XML.Cursor
 import XmlUtils
-import EpiDoc.EpiDoc
 import EpiDoc.TypeClasses
 import Data.Maybe (isJust, mapMaybe)
 import EpiDoc.Token (HasTokens, Token, tokens, create)

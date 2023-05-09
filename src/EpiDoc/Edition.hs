@@ -2,79 +2,86 @@
 {-# LANGUAGE InstanceSigs #-}
 
 module EpiDoc.Edition
-    ( edition
-    , editionCursor
-    , edition'
-    , edition''
-    , Edition
-    , lbs
-    , textContent
+    ( 
+        Edition,
+        Token,
+        -- Boundary,
+        newBoundary,
+        newToken,
+        show
+
     ) where
 
+-- import Text.XML
 import Text.XML
-import Text.XML.Cursor
-import XmlUtils
-import EpiDoc.EpiDoc ()
-import EpiDoc.TypeClasses hiding (words)
-import EpiDoc.Token
-import EpiDoc.Lb
-import Data.Text as T
-import Data.Maybe (mapMaybe)
+import Text.XML.Cursor ()
+import EpiDoc.Token(Token)
+import qualified Data.Text as T
 
-newtype Edition = Ed {editionCursor :: Cursor}
+import XmlUtils (localName, descContent)
+import EpiDoc.TypeClasses (HasTextContent(..), HasCursor(..))
+import Data.List (intercalate)
+
+data Edition = 
+      EditionSeq [Edition]
+    | Token {name :: T.Text, text :: T.Text, children :: [Edition]}
+    | Subtoken {name :: T.Text, text :: T.Text, children :: [Edition]}
+    | Boundary {name :: T.Text, number :: T.Text}
+    | Container {name :: T.Text, children :: [Edition]}
+    | EditionText T.Text
+    | Empty
 
 
-instance HasTokens Edition where
-    tokens :: Edition -> [EpiDoc.Token.Token]
-    tokens ed = do 
-        let wCursors = xDescCursors (editionCursor ed) "w"
-        mapMaybe EpiDoc.Token.create wCursors
+instance Semigroup Edition where
+    (<>) :: Edition -> Edition -> Edition
+    EditionSeq es <> e = EditionSeq (es <> [e]) 
+    Token n t es <> e = EditionSeq [Token n t es, e]
+    Subtoken n t es <> e = EditionSeq [Subtoken n t es, e]
+    Boundary n no <> e = EditionSeq [Boundary n no, e]
+    Container n es <> e = EditionSeq [Container n es, e]
+    EditionText t <> e = EditionSeq [EditionText t, e]
+    Empty <> e = e
+
+
+instance Monoid Edition where
+    mempty :: Edition
+    mempty = Empty
 
 
 instance HasTextContent Edition where
-    textContent :: Edition -> String
-    textContent = T.unpack . descContent' . editionCursor
+    textContent :: Edition -> T.Text
+    textContent (EditionSeq es) = foldr (<>) "" [textContent e | e <- es]
+    textContent (Token _ t es) = t <> textContent (EditionSeq es)
+    textContent (Subtoken _ t es) = t <> textContent (EditionSeq es)
+    textContent (Container _ es) = textContent (EditionSeq es)
+    textContent (Boundary _ _) = ""
+    textContent (EditionText t) = t
+    textContent Empty = ""
 
 
-edition :: Document -> Edition
-edition doc = 
-    let editionFilter xs = [d | d <- xs, hasAttrVal d "type" "edition"] in
-        EpiDoc.Edition.create . Prelude.head . editionFilter . divNodes $ doc
+instance Show Edition where
+    show :: Edition -> String
+    show (Token n t es) = "Token('" <> T.unpack t <> "')"
+    show (EditionSeq es) = unwords $ show <$> es
+    show (Boundary n no) = " | "
+    show _ = "..."
+
+-- instance HasCursor Edition where
+--     -- cursor :: Edition -> Cursor
+--     -- cursor 
+
+--     create :: Cursor -> Maybe Edition
+--     create c = case localName c of
+--         Just "w" -> Just (Word (T.unpack $ descContent c) (create <$> descendant c))
+--         Just "num" -> Just (Num c)
+--         Just "name" -> Just (EpiDoc.EpiDoc.Name c)
+--         _ -> Nothing
 
 
-create :: Cursor -> Edition
-create = Ed
 
+newToken :: String -> String -> [Edition] -> Edition
+newToken n t = Token (T.pack n) (T.pack t)
+    
 
-edition' :: Document -> Maybe Edition
-edition' doc = 
-    let editionFilter xs = [d | d <- xs, hasAttrVal d "type" "edition"] in
-        create' . Prelude.head . editionFilter . divNodes $ doc
-
-
-create' :: Cursor -> Maybe Edition
-create' c = case localName c of
-  Nothing -> Nothing
-  Just txt -> case txt of
-    "div" -> if hasAttrVal c "type" "edition" then Just (Ed c) else Nothing
-    _ -> Nothing
-
-
-edition'' :: Document -> Maybe Edition
-edition'' doc = 
-    let editionFilter xs = [d | d <- xs, hasAttrVal d "type" "edition"] in
-        create'' =<< (maybeHead . editionFilter . divNodes $ doc)
-
-
-create'' :: Cursor -> Maybe Edition
-create'' c = case localName c of
-  Nothing -> Nothing
-  Just txt -> case txt of
-    "div" -> if hasAttrVal c "type" "edition" then Just (Ed c) else Nothing
-    _ -> Nothing
-
-
-lbs :: Edition -> [Lb]
-lbs ed = do 
-    let lbCursors = xDescCursors (editionCursor ed) "lb"
-    mapMaybe EpiDoc.Lb.create lbCursors
+newBoundary :: String -> String -> Edition
+newBoundary n no = Boundary (T.pack n) (T.pack no)
