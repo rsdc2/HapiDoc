@@ -4,7 +4,6 @@
 module EpiDoc.Edition
     ( 
         Edition,
-        Token,
         -- Boundary,
         newBoundary,
         newToken,
@@ -15,7 +14,6 @@ module EpiDoc.Edition
 -- import Text.XML
 import Text.XML
 import Text.XML.Cursor ()
-import EpiDoc.Token(Token)
 import qualified Data.Text as T
 
 import XmlUtils (localName, descContent)
