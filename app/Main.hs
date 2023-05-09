@@ -15,7 +15,7 @@ import qualified EpiDoc.Lb as Lb
 import XmlUtils
 import EpiDoc.TypeClasses (HasTextContent(textContent))
 import Control.Applicative (Alternative(some)) 
-import EpiDoc.Edition (Edition, Token, newToken, newBoundary)
+import EpiDoc.Edition (Edition, newToken, newBoundary)
 
 
 -- isicFunc :: IO ()
