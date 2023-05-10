@@ -3,10 +3,12 @@
 
 module EpiDoc.Edition
     ( 
-        Edition,
+        Edition(..),
+        ElemType(..),
+        text,
         -- Boundary,
-        newBoundary,
-        newToken,
+        -- newBoundary,
+        w,
         show
 
     ) where
@@ -20,25 +22,70 @@ import XmlUtils (localName, descContent)
 import EpiDoc.TypeClasses (HasTextContent(..), HasCursor(..))
 import Data.List (intercalate)
 
+data ElemType = 
+      W {lemma :: String}
+    | Name' 
+    | Num
+    | Lb {number :: String}
+    | G {mark :: String}      
+
+
+instance Show ElemType where
+    show :: ElemType -> String
+    show (W l) = "w"
+    show Name' = "name"
+    show Num = "num"
+    show (Lb n) = "lb"
+    show (G m) = "g"
+
+
+-- data TokenType = 
+--       W {lemma :: String, pos :: String}
+--     | Name 
+--     | Num
+--     deriving Show
+
+data CompoundTokenType = PersName | OrgName
+    deriving Show
+
+data SubTokenType = Expan
+    deriving Show
+
+-- data BoundaryType = 
+--       Lb {number :: String} 
+--     | G
+
+data ContainerType = Ab | Div
+
+
 data Edition = 
-      EditionSeq [Edition]
-    | Token {name :: T.Text, text :: T.Text, children :: [Edition]}
-    | Subtoken {name :: T.Text, text :: T.Text, children :: [Edition]}
-    | Boundary {name :: T.Text, number :: T.Text}
-    | Container {name :: T.Text, children :: [Edition]}
+      EditionSeq [Edition] 
+    | EditionElem ElemType Edition
     | EditionText T.Text
     | Empty
 
 
+-- data Edition l a where
+--     Edition :: (EditionElem a, Functor l) => l a -> Edition l a
+
+-- data Edition a = Edition [EditionElem]
+
+
 instance Semigroup Edition where
     (<>) :: Edition -> Edition -> Edition
+    -- Edition e1s <> Edition e2s = Edition (e1s <> e2s)
+    EditionSeq e1s <> EditionSeq e2s = EditionSeq (e1s <> e2s)
     EditionSeq es <> e = EditionSeq (es <> [e]) 
-    Token n t es <> e = EditionSeq [Token n t es, e]
-    Subtoken n t es <> e = EditionSeq [Subtoken n t es, e]
-    Boundary n no <> e = EditionSeq [Boundary n no, e]
-    Container n es <> e = EditionSeq [Container n es, e]
-    EditionText t <> e = EditionSeq [EditionText t, e]
+    e <> EditionSeq es = EditionSeq ([e] <> es) 
     Empty <> e = e
+    e1 <> e2 = EditionSeq [e1, e2]
+
+    -- Token n t e1s <> EditionSeq e2s = EditionSeq ([Token n t e1s] <> e2s)
+    -- Token n t es <> e = EditionSeq [Token n t es, e]
+    -- Subtoken n t es <> e = EditionSeq [Subtoken n t es, e]
+    -- Boundary n no <> e = EditionSeq [Boundary n no, e]
+    -- Container n es <> e = EditionSeq [Container n es, e]
+    -- EditionText t <> e = EditionSeq [EditionText t, e]
 
 
 instance Monoid Edition where
@@ -47,22 +94,39 @@ instance Monoid Edition where
 
 
 instance HasTextContent Edition where
+    descTextContent :: Edition -> T.Text
+    descTextContent (EditionSeq es) = foldr (<>) "" [textContent e | e <- es]
+    descTextContent (EditionText s) = s 
+    descTextContent (EditionElem _ e) = textContent e
+    descTextContent Empty = T.pack ""
+
     textContent :: Edition -> T.Text
+    textContent (EditionText s) = s
     textContent (EditionSeq es) = foldr (<>) "" [textContent e | e <- es]
-    textContent (Token _ t es) = t <> textContent (EditionSeq es)
-    textContent (Subtoken _ t es) = t <> textContent (EditionSeq es)
-    textContent (Container _ es) = textContent (EditionSeq es)
-    textContent (Boundary _ _) = ""
-    textContent (EditionText t) = t
+    textContent (EditionElem _ e) = textContent e
     textContent Empty = ""
 
+-- instance Show (Edition a) where
+--     show :: Edition a -> String
+--     show (Edition es) = "[" <> unwords (show <$> es) <> "]"
 
 instance Show Edition where
     show :: Edition -> String
-    show (Token n t es) = "Token('" <> T.unpack t <> "')"
-    show (EditionSeq es) = unwords $ show <$> es
-    show (Boundary n no) = " | "
-    show _ = "..."
+    -- show (EditionSeq es) = "[" <> unwords (show <$> es) <> "]"
+    -- show (EditionElem t e) = "Token('" <> T.unpack t <> "')"
+    -- show (EditionText x) = x
+    -- show _ = "..."
+    show (EditionSeq es) = "EditionSeq[" <> unwords (show <$> es) <> "]"
+    show (EditionElem t e) = show t <> "(" <> show e <> ")"
+    show (EditionText x) = "text('" <> T.unpack x <> "')"
+    show _ = ""
+
+-- instance Show EditionElem where
+--     show :: EditionElem -> String
+--     show (Token n t es) = "Token('" <> T.unpack t <> "')"
+--     show (Boundary n no) = " | "
+--     show _ = "..."
+
 
 -- instance HasCursor Edition where
 --     -- cursor :: Edition -> Cursor
@@ -77,9 +141,11 @@ instance Show Edition where
 
 
 
-newToken :: String -> String -> [Edition] -> Edition
-newToken n t = Token (T.pack n) (T.pack t)
+w :: String -> Edition -> Edition
+w l = EditionElem (W l)
     
+text :: String -> Edition
+text s = EditionText (T.pack s)
 
-newBoundary :: String -> String -> Edition
-newBoundary n no = Boundary (T.pack n) (T.pack no)
+-- newBoundary :: String -> String -> Edition
+-- newBoundary n no = EditionElem (T.pack n) (T.pack no)

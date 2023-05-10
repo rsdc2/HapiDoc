@@ -15,7 +15,7 @@ import qualified EpiDoc.Lb as Lb
 import XmlUtils
 import EpiDoc.TypeClasses (HasTextContent(textContent))
 import Control.Applicative (Alternative(some)) 
-import EpiDoc.Edition (Edition, newToken, newBoundary)
+import EpiDoc.Edition (Edition(..), ElemType(..), text, w)
 
 
 -- isicFunc :: IO ()
@@ -82,8 +82,9 @@ import EpiDoc.Edition (Edition, newToken, newBoundary)
 
 
 createEdition :: Edition
-createEdition = newToken "w" "Dis" [] <> newBoundary "lb" "1" <> newToken "w" "Manibus" []
-
+-- createEdition = newToken "w" "Dis" [] <> newToken "lb" "1" <> newToken "w" "Manibus" []
+-- createEdition = newToken "w" "Dis" [] <> newToken "w" "Manibus" []
+createEdition = w "Deus" (EditionSeq [text "Dis", text "Hello"]) <> w "Manes" (text "Manibus") <> text "vixit"
 
 main :: IO ()
 -- main = isicFunc''
