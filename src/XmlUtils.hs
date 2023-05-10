@@ -55,10 +55,12 @@ localName = maybeLocalName . maybeElementName . getElement . node
 
 
 attrs :: Cursor -> Maybe (Map Name T.Text)
-attrs c = 
-    case getElement . node $ c of 
-        Just el -> Just (elementAttributes el)
-        Nothing -> Nothing
+attrs c =
+    -- case getElement . node $ c of 
+    --     Just el -> Just (elementAttributes el)
+    --     Nothing -> Nothing
+    let e = getElement . node $ c
+    in elementAttributes <$> e
 
 
 attr :: T.Text -> Maybe (Map Name T.Text) -> Maybe T.Text
