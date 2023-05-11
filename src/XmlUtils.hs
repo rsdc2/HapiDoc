@@ -22,12 +22,37 @@ module XmlUtils
     , xDescCursors
     , descContent
     , descContent'
+    , writeDoc
+    , createTEIDoc
     ) where
 
 import Text.XML
+    -- ( Document,
+    --   Name(Name, nameLocalName),
+    --   Element(elementAttributes, elementName),
+    --   Node(NodeElement) )
 import Text.XML.Cursor
-import Data.Map
+    ( content, fromDocument, descendant, parent, node, Cursor )
+import Data.Map ( lookup, Map, empty )
 import qualified Data.Text as T
+import Text.XML (Prologue)
+import Prelude hiding (writeFile)
+
+
+emptyPrologue :: Prologue
+emptyPrologue = Prologue [] Nothing []
+
+
+emptyMisc :: [Miscellaneous]
+emptyMisc = []
+
+
+createTEIDoc :: Document
+createTEIDoc = Document emptyPrologue (Element "TEI" empty []) emptyMisc
+
+
+writeDoc :: String -> Document -> IO()
+writeDoc = writeFile def
 
 
 getElement :: Node -> Maybe Element

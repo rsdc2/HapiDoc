@@ -11,11 +11,15 @@ module EpiDoc.TypeClasses
     , cursor
     , create
     , EditionElem(..)
-    -- , XMLable(..)
+    , XMLable(..)
+    , HasXMLName(..)
     ) where
 
 import Text.XML.Cursor
-import Text.XML(Element, Node(..))
+import Text.XML
+    ( Element
+    , Node(..)
+    , Name(..))
 import qualified Data.Text as T
 
 
@@ -34,9 +38,13 @@ class HasCursor a where
     create :: Cursor -> Maybe a
 
 
--- class XMLable a where
---     toElems :: a -> [Element]
---     toNodes :: a -> [Node]
+class XMLable a where
+    toElems :: a -> [Element]
+    toNodes :: a -> [Node]
+
+
+class HasXMLName a where
+    tagName :: a -> Name
 
 
 class EditionElem a where

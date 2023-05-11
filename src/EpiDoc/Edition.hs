@@ -23,10 +23,11 @@ import XmlUtils (localName, descContent)
 import EpiDoc.TypeClasses 
     (     
         HasTextContent(..),
-        HasCursor(..) 
+        HasCursor(..),
+        XMLable(..),
+        HasXMLName(..)
     )
 
-    -- XMLable(..)
 
 
 data ElemType = 
@@ -45,6 +46,14 @@ instance Show ElemType where
     show (Lb n) = "lb{" <> maybe "" quote n 
     show (G m) = "g{" <> maybe "" quote m
 
+
+instance HasXMLName ElemType where
+    tagName :: ElemType -> Name
+    tagName (W _) = Name "w" Nothing Nothing
+    tagName Name' = Name "name" Nothing Nothing
+    tagName Num  = Name "num" Nothing Nothing
+    tagName (Lb _) = Name "lb" Nothing Nothing
+    tagName (G _) = Name "g" Nothing Nothing
 
 -- data TokenType = 
 --       W {lemma :: String, pos :: String}
@@ -131,8 +140,9 @@ instance Show Edition where
 
 
 -- instance XMLable Edition where
---     toElem :: Edition -> [Element]
---     toElem (EditionSeq es) = toElem <$> es
+--     toElems :: Edition -> [Element]
+--     toElems (EditionSeq es) = es >>= toElems
+--     toElems (EditionElem t e) = [Element (tagName t)]
 
 
 -- instance Show EditionElem where

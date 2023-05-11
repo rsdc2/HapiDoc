@@ -12,7 +12,7 @@ import qualified Data.Text as T
 
 import qualified EpiDoc.Token as Token
 import qualified EpiDoc.Lb as Lb
-import XmlUtils
+import XmlUtils(writeDoc, createTEIDoc)
 import EpiDoc.TypeClasses (HasTextContent(textContent))
 import Control.Applicative (Alternative(some)) 
 import EpiDoc.Edition (Edition(..), ElemType(..), text, w)
@@ -86,9 +86,11 @@ createEdition :: Edition
 -- createEdition = newToken "w" "Dis" [] <> newToken "w" "Manibus" []
 createEdition = w "Deus" (EditionSeq [text "Dis", text "Hello"]) <> w "Manes" (text "Manibus") <> text "vixit"
 
+
 main :: IO ()
 -- main = isicFunc''
 -- main = editionText
-main = do
-    let s = show createEdition
-    print s
+-- main = do
+--     let s = show createEdition
+--     print s
+main = writeDoc "test.xml" createTEIDoc
