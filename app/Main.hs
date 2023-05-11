@@ -12,10 +12,10 @@ import qualified Data.Text as T
 
 import qualified EpiDoc.Token as Token
 import qualified EpiDoc.Lb as Lb
-import XmlUtils(writeDoc, createTEIDoc)
+import XmlUtils(writeDoc, createTEIDoc, editionTemplate)
 import EpiDoc.TypeClasses (HasTextContent(textContent))
-import Control.Applicative (Alternative(some)) 
-import EpiDoc.Edition (Edition(..), ElemType(..), text, w)
+-- import Control.Applicative (Alternative(some)) 
+import EpiDoc.Edition (Edition(..), ElemType(..), text, w, toNodes)
 
 
 -- isicFunc :: IO ()
@@ -93,4 +93,6 @@ main :: IO ()
 -- main = do
 --     let s = show createEdition
 --     print s
-main = writeDoc "test.xml" createTEIDoc
+main = 
+    writeDoc "test.xml" $ createTEIDoc [editionTemplate nodes] where
+        nodes = toNodes createEdition

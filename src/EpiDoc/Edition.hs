@@ -9,7 +9,9 @@ module EpiDoc.Edition
         -- Boundary,
         -- newBoundary,
         w,
-        show
+        show,
+        toNodes
+
 
     ) where
 
@@ -27,7 +29,7 @@ import EpiDoc.TypeClasses
         XMLable(..),
         HasXMLName(..)
     )
-
+import Data.Map(empty)
 
 
 data ElemType = 
@@ -139,10 +141,12 @@ instance Show Edition where
     show _ = ""
 
 
--- instance XMLable Edition where
---     toElems :: Edition -> [Element]
---     toElems (EditionSeq es) = es >>= toElems
---     toElems (EditionElem t e) = [Element (tagName t)]
+instance XMLable Edition where
+    toNodes :: Edition -> [Node]
+    toNodes (EditionSeq es) = es >>= toNodes
+    toNodes (EditionElem t e) = [NodeElement $ Element (tagName t) empty (toNodes e)]
+    toNodes (EditionText x) = [NodeContent x]
+    toNodes _ = []
 
 
 -- instance Show EditionElem where

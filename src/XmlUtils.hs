@@ -24,6 +24,7 @@ module XmlUtils
     , descContent'
     , writeDoc
     , createTEIDoc
+    , editionTemplate
     ) where
 
 import Text.XML
@@ -33,11 +34,12 @@ import Text.XML
     --   Node(NodeElement) )
 import Text.XML.Cursor
     ( content, fromDocument, descendant, parent, node, Cursor )
-import Data.Map ( lookup, Map, empty )
+import Data.Map ( lookup, Map, empty)
+import qualified Data.Map as Map
+
 import qualified Data.Text as T
 import Text.XML (Prologue)
 import Prelude hiding (writeFile)
-
 
 emptyPrologue :: Prologue
 emptyPrologue = Prologue [] Nothing []
@@ -47,8 +49,12 @@ emptyMisc :: [Miscellaneous]
 emptyMisc = []
 
 
-createTEIDoc :: Document
-createTEIDoc = Document emptyPrologue (Element "TEI" empty []) emptyMisc
+createTEIDoc :: [Node] -> Document
+createTEIDoc ns = Document emptyPrologue (Element "TEI" empty ns) emptyMisc
+
+
+editionTemplate :: [Node] -> Node
+editionTemplate ns = NodeElement $ Element "div" (Map.fromList [("type", "edition")]) ns
 
 
 writeDoc :: String -> Document -> IO()

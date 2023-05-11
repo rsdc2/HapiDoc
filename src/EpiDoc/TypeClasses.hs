@@ -39,7 +39,6 @@ class HasCursor a where
 
 
 class XMLable a where
-    toElems :: a -> [Element]
     toNodes :: a -> [Node]
 
 
