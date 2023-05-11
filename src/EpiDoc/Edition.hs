@@ -17,26 +17,33 @@ module EpiDoc.Edition
 import Text.XML
 import Text.XML.Cursor ()
 import qualified Data.Text as T
-
+import Data.Maybe(fromMaybe)
+import Utils(quote, paren, toMaybe, curly)
 import XmlUtils (localName, descContent)
-import EpiDoc.TypeClasses (HasTextContent(..), HasCursor(..))
-import Data.List (intercalate)
+import EpiDoc.TypeClasses 
+    (     
+        HasTextContent(..),
+        HasCursor(..) 
+    )
+
+    -- XMLable(..)
+
 
 data ElemType = 
-      W {lemma :: String}
+      W (Maybe String) -- W Lemma
     | Name' 
     | Num
-    | Lb {number :: String}
-    | G {mark :: String}      
+    | Lb (Maybe String) -- Lb LineNo
+    | G (Maybe String) -- G Mark
 
 
 instance Show ElemType where
     show :: ElemType -> String
-    show (W l) = "w"
-    show Name' = "name"
-    show Num = "num"
-    show (Lb n) = "lb"
-    show (G m) = "g"
+    show (W l) = "w{" <> maybe "" quote l
+    show Name' = "name{"
+    show Num = "num{"
+    show (Lb n) = "lb{" <> maybe "" quote n 
+    show (G m) = "g{" <> maybe "" quote m
 
 
 -- data TokenType = 
@@ -116,10 +123,17 @@ instance Show Edition where
     -- show (EditionElem t e) = "Token('" <> T.unpack t <> "')"
     -- show (EditionText x) = x
     -- show _ = "..."
-    show (EditionSeq es) = "EditionSeq[" <> unwords (show <$> es) <> "]"
-    show (EditionElem t e) = show t <> "(" <> show e <> ")"
-    show (EditionText x) = "text('" <> T.unpack x <> "')"
+    show (EditionSeq es) = "[" <> unwords (show <$> es) <> "]"
+    show (EditionElem t e) = show t <> " " <> show e <> "}"
+    show (EditionText x) = "text" <> (paren . quote $ T.unpack x) 
+    -- show (EditionText x) = quote $ T.unpack x 
     show _ = ""
+
+
+-- instance XMLable Edition where
+--     toElem :: Edition -> [Element]
+--     toElem (EditionSeq es) = toElem <$> es
+
 
 -- instance Show EditionElem where
 --     show :: EditionElem -> String
@@ -142,7 +156,7 @@ instance Show Edition where
 
 
 w :: String -> Edition -> Edition
-w l = EditionElem (W l)
+w l = EditionElem . W $ toMaybe "" l
     
 text :: String -> Edition
 text s = EditionText (T.pack s)

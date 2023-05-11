@@ -2,16 +2,23 @@
 
 module Utils
     ( 
-    
+      quote
+    , paren
+    , toMaybe
+    , curly
     ) where
 
--- import Data.Maybe (isJust)
+quote :: String -> String
+quote s = "'" <> s <> "'"
 
--- somethings :: [Maybe a] -> [a]
--- somethings xs = do
---     let somethings = filter isJust xs 
---     unpack <$> somethings
+paren :: String -> String
+paren s = "(" <> s <> ")"
 
+curly :: String -> String
+curly s = "{" <> s <> "}"
 
--- unpack :: Maybe a -> a
--- unpack (Just x) = x
+-- Reverse of built-in maybe function
+-- Converts a default value into a Nothing
+-- Otherwise returns a Just 
+toMaybe :: (Eq a) => a -> a -> Maybe a
+toMaybe d v = if d == v then Nothing else Just v
