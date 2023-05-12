@@ -41,6 +41,7 @@ import qualified Data.Text as T
 import Text.XML (Prologue)
 import Prelude hiding (writeFile)
 
+
 emptyPrologue :: Prologue
 emptyPrologue = Prologue [] Nothing []
 

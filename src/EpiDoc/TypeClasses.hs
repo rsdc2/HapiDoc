@@ -19,7 +19,8 @@ import Text.XML.Cursor
 import Text.XML
     ( Element
     , Node(..)
-    , Name(..))
+    , Name(..)
+    , Document)
 import qualified Data.Text as T
 
 
@@ -40,10 +41,14 @@ class HasCursor a where
 
 class XMLable a where
     toNodes :: a -> [Node]
+    -- fromNodes :: [Node] -> a
+    -- fromNode :: Node -> a
+    -- fromDoc :: Document -> a
 
 
 class HasXMLName a where
     tagName :: a -> Name
+    fromName :: Name -> a
 
 
 class EditionElem a where

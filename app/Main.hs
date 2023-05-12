@@ -15,7 +15,7 @@ import qualified EpiDoc.Lb as Lb
 import XmlUtils(writeDoc, createTEIDoc, editionTemplate)
 import EpiDoc.TypeClasses (HasTextContent(textContent))
 -- import Control.Applicative (Alternative(some)) 
-import EpiDoc.Edition (Edition(..), ElemType(..), text, w, toNodes)
+import EpiDoc.Edition (Edition(..), ElemType(..), text, w, toNodes, tokenize, fromNodes, fromDoc)
 
 
 -- isicFunc :: IO ()
@@ -82,17 +82,24 @@ import EpiDoc.Edition (Edition(..), ElemType(..), text, w, toNodes)
 
 
 createEdition :: Edition
--- createEdition = newToken "w" "Dis" [] <> newToken "lb" "1" <> newToken "w" "Manibus" []
--- createEdition = newToken "w" "Dis" [] <> newToken "w" "Manibus" []
-createEdition = w "Deus" (EditionSeq [text "Dis", text "Hello"]) <> w "Manes" (text "Manibus") <> text "vixit"
+createEdition = w "Deus" (text "Dis") <> w "Manes" (text "Manibus") <> text "vixit"
+
+
+tokenizeEdition :: IO ()
+tokenizeEdition = writeDoc "test.xml" $ createTEIDoc [editionTemplate nodes] where
+            nodes = toNodes (tokenize createEdition)
+
+
+editionFromXML :: IO ()
+editionFromXML = do
+    doc <- readFile def "test.xml"
+    let ed = EpiDoc.Edition.fromDoc doc
+    let tokenized = tokenize ed
+    let newDoc = createTEIDoc [editionTemplate nodes] where
+            nodes = toNodes tokenized
+    writeDoc "tokenized.xml" newDoc
+    print tokenized
 
 
 main :: IO ()
--- main = isicFunc''
--- main = editionText
--- main = do
---     let s = show createEdition
---     print s
-main = 
-    writeDoc "test.xml" $ createTEIDoc [editionTemplate nodes] where
-        nodes = toNodes createEdition
+main = editionFromXML
