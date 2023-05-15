@@ -50,11 +50,14 @@ replaceEditionInDoc d = d
     -- let editionNode = node <$> c
     -- let editionNode' = node c'
 
-    
 
 replaceEditionNode :: Node -> Node -> Node
-replaceEditionNode n' n = if isEdition n then n' else n
+replaceEditionNode n' (NodeElement (Element name attrs ns)) = 
+    if isEdition (NodeElement (Element name attrs ns)) 
+        then n' 
+        else NodeElement (Element name attrs (replaceEditionNode n' <$> ns))
 
+replaceEditionNode _ n = n
 
 replaceTextNode :: Node -> Node -> Node
 replaceTextNode n' (NodeElement (Element "text" _ _)) = editionTemplate []
@@ -75,12 +78,12 @@ editionNode ns = NodeElement $ Element "div" (Map.fromList [("type", "edition")]
 
 
 isEdition :: Node -> Bool
-isEdition (NodeElement (Element "div" attrs _)) = isAttrValInAttrs ("type", "edition") attrs
+isEdition (NodeElement (Element "{http://www.tei-c.org/ns/1.0}div" attrs _)) = isAttrValInAttrs ("type", "edition") attrs
 isEdition _ = False
 
 
 editionTemplate :: [Node] -> Node
-editionTemplate ns = NodeElement $ Element "div" (Map.fromList [("type", "edition")]) ns
+editionTemplate ns = NodeElement $ Element "{http://www.tei-c.org/ns/1.0}div" (Map.fromList [("type", "edition")]) ns
 
 
 create :: Cursor -> Maybe XMLEdition

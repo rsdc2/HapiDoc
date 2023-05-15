@@ -104,7 +104,7 @@ editionFromXML = do
 
 replaceEdition :: IO ()
 replaceEdition = do
-    doc <- readFile def "test.xml"
+    doc <- readFile def "ISic000001.xml"
     let newDoc = replaceEditionInDoc doc
     writeDoc "no_edition.xml" newDoc
 
