@@ -13,7 +13,12 @@ module XmlUtils
     , maybeHead
     , localName
     , attrs
+    , attrsFromNode
     , attr
+    , isAttrInAttrs
+    , isAttrValInAttrs
+    , isAttrValInCursor
+    , isAttrValInNode
     , getAttr
     , hasAttrVal
     , matchLocalName
@@ -21,10 +26,8 @@ module XmlUtils
     , parent
     , xDescCursors
     , descContent
-    , descContent'
     , writeDoc
     , createTEIDoc
-    , editionTemplate
     ) where
 
 import Text.XML
@@ -33,7 +36,7 @@ import Text.XML
     --   Element(elementAttributes, elementName),
     --   Node(NodeElement) )
 import Text.XML.Cursor
-    ( content, fromDocument, descendant, parent, node, Cursor )
+    ( content, fromDocument, descendant, parent, node, Cursor, Axis)
 import Data.Map ( lookup, Map, empty)
 import qualified Data.Map as Map
 
@@ -42,24 +45,59 @@ import Text.XML (Prologue)
 import Prelude hiding (writeFile)
 
 
-emptyPrologue :: Prologue
-emptyPrologue = Prologue [] Nothing []
+attr :: T.Text -> Map Name T.Text -> Maybe T.Text
+attr a as =
+    let n = Name a Nothing Nothing
+    in Data.Map.lookup n as
 
 
-emptyMisc :: [Miscellaneous]
-emptyMisc = []
+attrs :: Cursor -> Maybe (Map Name T.Text)
+attrs c = elementAttributes <$> e
+    where e = getElement . node $ c
+
+
+attrsFromNode :: Node -> Maybe (Map Name T.Text)
+attrsFromNode n = elementAttributes <$> e
+    where e = getElement n
+
+
+isAttrInAttrs :: T.Text -> Map Name T.Text -> Bool
+isAttrInAttrs a as = attr a as /= Nothing
+
+
+isAttrValInAttrs :: (T.Text, T.Text) -> Map Name T.Text -> Bool
+isAttrValInAttrs (k, v) as = attr k as == Just v
+
+
+isAttrValInNode :: (T.Text, T.Text) -> Node -> Bool
+isAttrValInNode (k, v) (NodeElement (Element _ as _)) = isAttrValInAttrs (k, v) as
+isAttrValInNode (_, _) _ = False
+
+
+isAttrValInCursor :: (T.Text, T.Text) -> Cursor -> Bool
+isAttrValInCursor (k, v) c = isAttrValInNode (k, v) $ node c
 
 
 createTEIDoc :: [Node] -> Document
 createTEIDoc ns = Document emptyPrologue (Element "TEI" empty ns) emptyMisc
 
 
-editionTemplate :: [Node] -> Node
-editionTemplate ns = NodeElement $ Element "div" (Map.fromList [("type", "edition")]) ns
+xDescCursors :: Cursor -> T.Text -> [Cursor]
+xDescCursors c nodeLocalName =
+    let desc = descendant c in
+        [x | x <- desc, hasLocalName nodeLocalName x]
 
 
-writeDoc :: String -> Document -> IO()
-writeDoc = writeFile def
+descContent :: Cursor -> T.Text
+descContent c = T.concat $ content =<< descendant c 
+
+
+emptyMisc :: [Miscellaneous]
+emptyMisc = []
+
+
+emptyPrologue :: Prologue
+emptyPrologue = Prologue [] Nothing []
 
 
 getElement :: Node -> Maybe Element
@@ -86,22 +124,6 @@ localName :: Cursor -> Maybe T.Text
 localName = maybeLocalName . maybeElementName . getElement . node
 
 
-attrs :: Cursor -> Maybe (Map Name T.Text)
-attrs c =
-    -- case getElement . node $ c of 
-    --     Just el -> Just (elementAttributes el)
-    --     Nothing -> Nothing
-    let e = getElement . node $ c
-    in elementAttributes <$> e
-
-
-attr :: T.Text -> Maybe (Map Name T.Text) -> Maybe T.Text
-attr a as =
-    case as of
-      Nothing -> Nothing
-      Just mp -> do
-        let n = Name a Nothing Nothing
-        Data.Map.lookup n mp
 
 
 getAttr :: String -> Map Name T.Text -> Maybe String
@@ -117,14 +139,17 @@ divNodes doc = do
         [x | x <- desc, hasLocalName "div" x]
 
 
-
 hasAttrVal :: Cursor -> T.Text -> T.Text -> Bool
 hasAttrVal c a v = do
     let as = attrs c
-    let v' = attr a as
+    let v' = attr a =<< as
     case v' of 
       Nothing -> False
       Just txt -> txt == v
+
+-- hasAttrValNode :: Node -> T.Text -> T.Text -> Bool
+-- hasAttrVal n a v = case attrsNode n of
+--     | 
 
     
 matchLocalName :: T.Text -> Maybe T.Text -> Bool
@@ -138,23 +163,8 @@ hasLocalName s c =
     in matchLocalName s ln
 
 
-xDescCursors :: Cursor -> T.Text -> [Cursor]
-xDescCursors c nodeLocalName =
-    let desc = descendant c in
-        [x | x <- desc, hasLocalName nodeLocalName x]
-
-
-descContent :: Cursor -> T.Text
-descContent c = do
-    let descs = descendant c
-    let c = concat . Prelude.map content $ descs
-    -- let c = [content d | d <- descs]
-    let t = T.concat c   
-    t
-
-descContent' :: Cursor -> T.Text
--- descContent' c = T.concat $ concat . Prelude.map content . descendant $ c 
-descContent' c = T.concat $ content =<< descendant c
+writeDoc :: String -> Document -> IO()
+writeDoc = writeFile def
 
 
 -- getParent :: Cursor -> Maybe Cursor

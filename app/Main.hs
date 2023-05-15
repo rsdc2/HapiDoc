@@ -12,10 +12,11 @@ import qualified Data.Text as T
 
 import qualified EpiDoc.Token as Token
 import qualified EpiDoc.Lb as Lb
-import XmlUtils(writeDoc, createTEIDoc, editionTemplate)
+import XmlUtils(writeDoc, createTEIDoc)
 import EpiDoc.TypeClasses (HasTextContent(textContent))
 -- import Control.Applicative (Alternative(some)) 
 import EpiDoc.Edition (Edition(..), ElemType(..), text, w, toNodes, tokenize, fromNodes, fromDoc)
+import EpiDoc.XMLEdition (XMLEdition(..), editionTemplate, replaceEditionInDoc)
 
 
 -- isicFunc :: IO ()
@@ -101,5 +102,12 @@ editionFromXML = do
     print tokenized
 
 
+replaceEdition :: IO ()
+replaceEdition = do
+    doc <- readFile def "test.xml"
+    let newDoc = replaceEditionInDoc doc
+    writeDoc "no_edition.xml" newDoc
+
+
 main :: IO ()
-main = editionFromXML
+main = replaceEdition

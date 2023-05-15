@@ -25,6 +25,6 @@ create c = case localName c of
 
 
 followingSibElems :: (HasCursor e) => e -> [e]
-followingSibElems lb = do
+followingSibElems lb =
     let sibs = followingSibling . cursor $ lb
-    mapMaybe EpiDoc.Element.create sibs
+    in mapMaybe EpiDoc.Element.create sibs
