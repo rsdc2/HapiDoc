@@ -10,6 +10,10 @@ the [I.Sicily GitHub wiki](https://github.com/ISicily/ISicily/wiki).
 
 **NB: HapiDoc is currently under active development.**
 
+## Monoids
+
+Inspired by the approach of [HaTeX](https://github.com/Daniel-Diaz/HaTeX) HapiDoc models an EpiDoc document as a monoid. For further details on the behaviour of monoids, see the [HaTeX guide](https://github.com/Daniel-Diaz/hatex-guide). 
+
 
 ## Acknowledgements
 
