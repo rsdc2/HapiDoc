@@ -1,7 +1,7 @@
 name:                HapiDoc
 version:             0.1.0.0
 github:              "rsdc2/HapiDoc"
-license:             MIT
+license:             BSD-3
 author:              "Robert Crellin"
 maintainer:          "example@example.com"
 copyright:           "2023 Robert Crellin"

@@ -12,7 +12,7 @@ bug-reports:    https://github.com/rsdc2/HapiDoc/issues
 author:         Robert Crellin
 maintainer:     example@example.com
 copyright:      2023 Robert Crellin
-license:        MIT
+license:        BSD-3
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
